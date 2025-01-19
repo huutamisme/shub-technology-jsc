@@ -1,18 +1,25 @@
 import './App.css';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import Task1 from './pages/Task1';
+import Task2 from './pages/Task2';
+import Task3 from './pages/Task3';
+import RootLayout from './pages/Root';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <Task1 /> },
+      { path: 'task2', element: <Task2 /> },
+      { path: 'task3', element: <Task3 /> },
+    ]
+  }
+]);
 
 function App() {
   return (
-    <div className="min-h-screen bg-red-200 flex items-center justify-center">
-      <div className="card w-96 bg-primary text-primary-content">
-        <div className="card-body">
-          <h2 className="card-title">SHUB</h2>
-          <p>Simple UI with daisyui</p>
-          <div className="card-actions justify-end">
-            <button className="btn btn-secondary">Get Started</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <RouterProvider router={router} />
   );
 }
 
