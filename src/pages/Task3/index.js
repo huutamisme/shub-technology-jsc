@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+
 const fetchInputData = async () => {
     try {
         const response = await fetch("https://share.shub.edu.vn/api/intern-test/input", {
@@ -8,8 +9,8 @@ const fetchInputData = async () => {
         if (!response.ok) throw new Error("Failed to fetch input data");
         return await response.json();
     } catch (error) {
-        console.error(error);
-        throw error;
+        console.error("Fetch Input Data Error:", error);
+        return { token: "", data: [], query: [] };
     }
 };
 
@@ -26,8 +27,8 @@ const sendOutputData = async (token, results) => {
         if (!response.ok) throw new Error("Failed to send output data");
         return await response.json();
     } catch (error) {
-        console.error(error);
-        throw error;
+        console.error("Send Output Data Error:", error);
+        return null;
     }
 };
 
@@ -45,23 +46,28 @@ function Task3() {
             { type: "2", range: [0, 9] },
         ],
     };
-
     const [data, setData] = useState([]);
     const [queries, setQueries] = useState([]);
     const [token, setToken] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const inputData = fetchInputData();
+                //const inputData = sampleData;
+                const inputData = await fetchInputData();
                 setData(inputData.data);
                 setQueries(inputData.query);
                 setToken(inputData.token);
+
+                if (!inputData.data.length) {
+                    setErrorMessage("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+                }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                setErrorMessage("Đã xảy ra lỗi khi tải dữ liệu.");
             } finally {
                 setLoading(false);
             }
@@ -87,11 +93,11 @@ function Task3() {
     };
 
     const handleSubmitResults = async () => {
-        try {
-            await sendOutputData(token, results);
+        const response = await sendOutputData(token, results);
+        if (!response) {
+            setErrorMessage("Không thể gửi kết quả. Vui lòng thử lại sau.");
+        } else {
             alert("Results submitted successfully!");
-        } catch (error) {
-            console.error("Error submitting results:", error);
         }
     };
 
@@ -102,6 +108,11 @@ function Task3() {
                 <div className="text-lg text-center">Loading...</div>
             ) : (
                 <div className="flex flex-col w-full items-center">
+                    {errorMessage && (
+                        <div className="text-red-500 text-center mb-4">
+                            {errorMessage}
+                        </div>
+                    )}
                     <div className="mb-4 w-full max-w-lg">
                         <button
                             className="btn btn-primary w-full"
